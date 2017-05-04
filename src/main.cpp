@@ -171,12 +171,12 @@ int main(int argc, char* argv[]) {
     estimations.push_back(fusionEKF.ekf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
 
-      cout << "RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
+     // cout << "RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
   }
 
   // compute the accuracy (RMSE)
  // Tools tools;
-  //cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
+  cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
 
   // close files
   if (out_file_.is_open()) {

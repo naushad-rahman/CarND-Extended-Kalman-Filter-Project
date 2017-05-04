@@ -1,5 +1,7 @@
 #include "kalman_filter.h"
 
+#include <iostream>
+
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
@@ -15,6 +17,18 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
   H_ = H_in;
   R_ = R_in;
   Q_ = Q_in;
+}
+
+
+double wrapMax(double x, double max)
+{
+    /* integer math: `(max + x % max) % max` */
+    return fmod(max + fmod(x, max), max);
+}
+/* wrap x -> [min,max) */
+double wrapMinMax(double x, double min, double max)
+{
+    return min + wrapMax(x - min, max - min);
 }
 
 void KalmanFilter::Predict() {
@@ -56,7 +70,18 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
      * update the state by using Extended Kalman Filter equations
    */
     float rho = sqrt(x_(0)*x_(0) + x_(1)*x_(1));
-    float phi = atan2(x_(1), x_(0));
+
+    float phi =0.0;
+
+    if(x_(1)==0 && x_(0)==0 )
+    {
+        phi =0.0;
+    }
+    else
+    {
+        phi = atan2(x_(1), x_(0));
+    }
+
     float rho_dot;
     if (fabs(rho) < 0.0001) {
         rho_dot = 0;
@@ -66,6 +91,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     VectorXd z_pred(3);
     z_pred << rho, phi, rho_dot;
     VectorXd y = z - z_pred;
+
+    //Normalizing the angle within -pi to pi
+    y(1) = wrapMinMax(y(1), -M_PI, +M_PI);
+
+
     MatrixXd Ht = H_.transpose();
     MatrixXd S = H_ * P_ * Ht + R_;
     MatrixXd Si = S.inverse();
